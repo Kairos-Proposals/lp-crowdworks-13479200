@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal for Hakobune ― デザインシステム構築・UI実装のご提案 | Kairos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F3F4F7;
+    --surface: #FFFFFF;
+    --dark: #13151A;
+    --dark-2: #1D2029;
+    --primary: #4C5FFF;
+    --primary-dim: #E5E7FF;
+    --ios: #FF6B4A;
+    --android: #00B39A;
+    --text: #16181D;
+    --text-muted: #5D6270;
+    --border: #DEE1E7;
+    --mono: 'JetBrains Mono', monospace;
+    --head: 'Space Grotesk', 'Noto Sans JP', sans-serif;
+    --body: 'Noto Sans JP', sans-serif;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    font-family: var(--body);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  img{ max-width:100%; display:block; }
+  a{ color:inherit; }
+  section{ padding: 96px 24px; position: relative; }
+  .wrap{ max-width: 1100px; margin: 0 auto; }
+  h1,h2,h3{ font-family: var(--head); font-weight:700; letter-spacing: 0.01em; }
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--primary);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom: 20px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px; height:8px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background: var(--dark);
+    color: #F4F5F9;
+    padding: 120px 24px 90px;
+    overflow: hidden;
+    border-bottom: 1px solid #2A2E39;
+  }
+  .hero-grid-bg{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(ellipse 80% 60% at 60% 30%, black 40%, transparent 90%);
+    pointer-events: none;
+  }
+  .hero-inner{
+    position: relative;
+    max-width: 1180px;
+    margin: 0 auto;
+    display:grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 48px;
+    align-items:center;
+  }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    background: rgba(76,95,255,0.15);
+    border: 1px solid rgba(76,95,255,0.5);
+    color: #A9B3FF;
+    padding: 7px 14px;
+    border-radius: 999px;
+    margin-bottom: 28px;
+  }
+  .hero-badge .dot{
+    width:6px; height:6px; border-radius:50%;
+    background: var(--android);
+    box-shadow: 0 0 0 3px rgba(0,179,154,0.25);
+  }
+  .hero h1{
+    font-size: clamp(32px, 4.2vw, 52px);
+    line-height: 1.35;
+    color: #FFFFFF;
+    margin-bottom: 26px;
+  }
+  .hero h1 .hl{
+    color: var(--primary);
+    background: linear-gradient(180deg, transparent 62%, rgba(76,95,255,0.35) 62%);
+  }
+  .hero p.lead{
+    font-size: 16.5px;
+    color: #B7BBC7;
+    max-width: 46ch;
+    margin-bottom: 36px;
+  }
+  .hero-cta{
+    display:inline-flex; gap:14px; flex-wrap: wrap;
+  }
+  .btn{
+    font-family: var(--body);
+    font-weight:700;
+    font-size: 15px;
+    padding: 15px 28px;
+    border-radius: 8px;
+    text-decoration:none;
+    display:inline-block;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(76,95,255,0.35);
+  }
+  .btn-primary:hover{ transform: translateY(-2px); }
+  .btn-ghost{
+    border: 1px solid #3A3F4C;
+    color: #E7E8ED;
+  }
+  .btn-ghost:hover{ border-color: #6B72FF; }
+
+  /* token cards visual */
+  .token-stack{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .token-card{
+    background: var(--dark-2);
+    border: 1px solid #2E323F;
+    border-radius: 10px;
+    padding: 16px 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: #C9CCD6;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .token-card .k{ color: #8B90A0; }
+  .token-card .v{ color: #E8E9EE; font-weight:600; }
+  .swatch{
+    width:14px; height:14px; border-radius:4px; flex-shrink:0;
+    display:inline-block; margin-right:8px; vertical-align:-2px;
+  }
+  .token-card.ios{ margin-left: 28px; border-color: rgba(255,107,74,0.35); }
+  .token-card.android{ margin-left: 56px; border-color: rgba(0,179,154,0.35); }
+
+  /* ---------- SECTION: UNDERSTANDING ---------- */
+  .understanding{ background: var(--surface); }
+  .understanding .wrap{
+    display:grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 60px;
+    align-items: start;
+  }
+  .understanding h2{
+    font-size: clamp(24px, 3vw, 32px);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .understanding-points{
+    display:flex; flex-direction:column; gap: 22px;
+  }
+  .point{
+    display:flex; gap: 18px;
+    padding: 22px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .point .idx{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--primary);
+    background: var(--primary-dim);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .point p{ color: var(--text-muted); font-size: 15px; }
+  .point strong{ color: var(--text); display:block; margin-bottom:6px; font-size: 15.5px; }
+
+  /* ---------- SECTION: VALUES ---------- */
+  .values{ background: var(--bg); }
+  .section-head{ max-width: 640px; margin: 0 auto 56px; text-align:center; }
+  .section-head h2{ font-size: clamp(26px,3.4vw,36px); margin-bottom: 14px; }
+  .section-head p{ color: var(--text-muted); font-size: 15.5px; }
+  .value-grid{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+  }
+  .value-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 26px;
+    position: relative;
+    overflow:hidden;
+  }
+  .value-card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height: 4px;
+    background: var(--accent, var(--primary));
+  }
+  .value-card .num{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 18px;
+    display:block;
+  }
+  .value-card h3{ font-size: 18px; margin-bottom: 12px; color: var(--text); }
+  .value-card p{ color: var(--text-muted); font-size: 14.5px; }
+  .value-card.wide{ grid-column: span 1; }
+
+  /* ---------- SECTION: PROCESS ---------- */
+  .process{ background: var(--dark); color:#EDEEF3; }
+  .process .section-head p{ color:#9CA0B0; }
+  .process .section-head h2{ color:#fff; }
+  .timeline{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    position: relative;
+  }
+  .timeline::before{
+    content:"";
+    position:absolute; top:24px; left:0; right:0; height:1px;
+    background: #2E323F;
+  }
+  .phase{
+    padding: 0 18px;
+    position: relative;
+  }
+  .phase .dotmark{
+    width: 14px; height:14px; border-radius:50%;
+    background: var(--dark);
+    border: 2px solid var(--primary);
+    margin-bottom: 20px;
+    position: relative; z-index:1;
+  }
+  .phase .tag{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: #8B90A0;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    display:block;
+  }
+  .phase h3{ font-size: 16.5px; margin-bottom: 10px; color:#fff; }
+  .phase p{ font-size: 13.8px; color:#9EA2B2; }
+
+  /* ---------- CLOSING ---------- */
+  .closing{
+    background: linear-gradient(160deg, var(--primary) 0%, #3745D9 100%);
+    color: #fff;
+    text-align:center;
+  }
+  .closing .wrap{ max-width: 720px; }
+  .closing h2{ font-size: clamp(26px,3.6vw,38px); margin-bottom: 20px; }
+  .closing p{ color: rgba(255,255,255,0.85); margin-bottom: 36px; font-size: 16px; }
+  .closing .btn-primary{
+    background: #fff; color: var(--primary);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  }
+  .closing .meta{
+    margin-top: 40px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.7);
+    display:flex; justify-content:center; gap: 24px; flex-wrap:wrap;
+  }
+
+  footer{
+    background: var(--dark);
+    color: #6B7080;
+    text-align:center;
+    padding: 28px 24px;
+    font-size: 13px;
+    font-family: var(--mono);
+    border-top: 1px solid #23262F;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 900px){
+    .hero-inner{ grid-template-columns: 1fr; }
+    .understanding .wrap{ grid-template-columns: 1fr; }
+    .value-grid{ grid-template-columns: repeat(2,1fr); }
+    .timeline{ grid-template-columns: 1fr 1fr; row-gap: 40px; }
+    .timeline::before{ display:none; }
+  }
+  @media (max-width: 560px){
+    section{ padding: 64px 18px; }
+    .hero{ padding-top: 100px; }
+    .value-grid{ grid-template-columns: 1fr; }
+    .timeline{ grid-template-columns: 1fr; }
+    .token-card.ios{ margin-left: 14px; }
+    .token-card.android{ margin-left: 28px; }
+    .closing .meta{ flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="hero-badge"><span class="dot"></span>PROPOSAL FROM KAIROS ／ for Hakobune 様</div>
+      <h1>ひとつの<span class="hl">Token</span>が、<br>すべての画面の一貫性になる。</h1>
+      <p class="lead">Figmaのデザインと、iOS / Androidの実装。その間にある「翻訳」の工程を、私たちKairosが責任を持って担います。デザインシステムを"仕組み"として動かし続けるための実装パートナーです。</p>
+      <div class="hero-cta">
+        <a href="#closing" class="btn btn-primary">ご提案内容を相談する</a>
+        <a href="#process" class="btn btn-ghost">進め方を見る</a>
+      </div>
+    </div>
+    <div class="token-stack">
+      <div class="token-card">
+        <span class="k">--color-primary-500</span>
+        <span class="v"><span class="swatch" style="background:#4C5FFF;"></span>#4C5FFF</span>
+      </div>
+      <div class="token-card ios">
+        <span class="k">ios / spacing.md</span>
+        <span class="v"><span class="swatch" style="background:#FF6B4A;"></span>16pt</span>
+      </div>
+      <div class="token-card android">
+        <span class="k">android / elevation.02</span>
+        <span class="v"><span class="swatch" style="background:#00B39A;"></span>4dp</span>
+      </div>
+      <div class="token-card">
+        <span class="k">--radius-component</span>
+        <span class="v">12px</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="understanding">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Understanding</div>
+      <h2>「デザインシステムの導入・強化」<br>この一行の裏にある、<br>継続的な現場の負荷を理解しています。</h2>
+    </div>
+    <div class="understanding-points">
+      <div class="point">
+        <div class="idx">01</div>
+        <div>
+          <strong>Figmaと実装コードの間には、常に"翻訳"が必要です</strong>
+          <p>デザイナーが定義するtoken・コンポーネントを、そのままOSに渡すことはできません。パラメータ設計とフォーマット決めという地味だが不可欠な工程を、有識者として引き受けます。</p>
+        </div>
+      </div>
+      <div class="point">
+        <div class="idx">02</div>
+        <div>
+          <strong>iOSとAndroid、2つの文法を同時に扱う必要があります</strong>
+          <p>同じデザイントークンでも、iOSのpt/AutoLayoutとAndroidのdp/Composeでは設計思想が異なります。両OSの作法を理解した上でUI部品として提供することが求められる仕事だと理解しています。</p>
+        </div>
+      </div>
+      <div class="point">
+        <div class="idx">03</div>
+        <div>
+          <strong>属人化を避け、長期で安定運用できる体制が必要です</strong>
+          <p>月160H・フルリモート・長期就業を前提とした募集内容から、単発の実装ではなく「開発チームに提供し続ける仕組み」自体の構築が本質的な課題だと捉えています。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="values">
+  <div class="section-head">
+    <div class="eyebrow" style="justify-content:center;">What Kairos Provides</div>
+    <h2>Kairosが提供できる価値</h2>
+    <p>デザインシステムを「作って終わり」にせず、開発チームが日々使い続けられる形にするための実装力です。</p>
+  </div>
+  <div class="value-grid">
+    <div class="value-card" style="--accent:#4C5FFF;">
+      <span class="num">01 / TOKEN</span>
+      <h3>トークン・パラメータ設計</h3>
+      <p>Figma上のtoken / コンポーネント定義を、デザイナーと連携しながら実装可能なパラメータへ変換。命名規則から粒度まで一貫した設計を行います。</p>
+    </div>
+    <div class="value-card" style="--accent:#FF6B4A;">
+      <span class="num">02 / iOS</span>
+      <h3>iOS向けUI部品実装</h3>
+      <p>Human Interface Guidelinesを踏まえつつ、デザインシステムに準拠したコンポーネントとして再利用可能な形で提供します。</p>
+    </div>
+    <div class="value-card" style="--accent:#00B39A;">
+      <span class="num">03 / Android</span>
+      <h3>Android向けUI部品実装</h3>
+      <p>Material Designの制約とプロダクト固有のデザインを両立させ、iOS版と一貫した見た目・挙動になるよう調整して実装します。</p>
+    </div>
+    <div class="value-card" style="--accent:#4C5FFF;">
+      <span class="num">04 / RESOURCE</span>
+      <h3>リソース・フォーマット標準化</h3>
+      <p>画像などのリソースの命名・書き出しフォーマットを整備し、開発チームが迷わず取り込める配布フローを構築します。</p>
+    </div>
+    <div class="value-card" style="--accent:#FF6B4A;">
+      <span class="num">05 / TEAM</span>
+      <h3>長期伴走・ドキュメント化</h3>
+      <p>属人化を避けるため、設計判断の背景をドキュメントに残しながら進行。月次160H体制での安定的な稼働を前提に対応します。</p>
+    </div>
+    <div class="value-card" style="--accent:#00B39A;">
+      <span class="num">06 / SYNC</span>
+      <h3>デザイナーとの協業フロー構築</h3>
+      <p>顔出しMTGでの密な連携を前提に、デザイナー側の負荷を増やさず双方が確認しやすいレビュー・フィードバックの型を作ります。</p>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="section-head">
+    <div class="eyebrow" style="justify-content:center; color:#A9B3FF;">Process</div>
+    <h2>進め方・スケジュールイメージ</h2>
+    <p>まずは小さく検証しながら、月160Hの安定稼働へと移行していきます。</p>
+  </div>
+  <div class="timeline">
+    <div class="phase">
+      <div class="dotmark"></div>
+      <span class="tag">PHASE 0 ・ Week 1</span>
+      <h3>キックオフ・ヒアリング</h3>
+      <p>現状のFigma / デザインシステムの状態、開発チームの技術構成、連携フローを確認します。</p>
+    </div>
+    <div class="phase">
+      <div class="dotmark" style="border-color:#FF6B4A;"></div>
+      <span class="tag">PHASE 1 ・ Week 2-3</span>
+      <h3>トークン設計・パラメータ変換</h3>
+      <p>デザイナーと調整しながらtoken構造とパラメータ設計方針を確定させます。</p>
+    </div>
+    <div class="phase">
+      <div class="dotmark" style="border-color:#00B39A;"></div>
+      <span class="tag">PHASE 2 ・ Week 4-6</span>
+      <h3>UI部品の実装・提供</h3>
+      <p>iOS / Androidそれぞれのコンポーネントを実装し、開発チームへ順次提供します。</p>
+    </div>
+    <div class="phase">
+      <div class="dotmark"></div>
+      <span class="tag">PHASE 3 ・ Month 2〜</span>
+      <h3>継続運用・拡張体制へ</h3>
+      <p>月160Hの安定稼働として、新規コンポーネントの追加やリファクタリングに継続対応します。</p>
+    </div>
+  </div>
+</section>
+
+<section class="closing" id="closing">
+  <div class="wrap">
+    <h2>まずは、現状のデザインシステムを<br>見せていただくところから。</h2>
+    <p>ポートフォリオと簡単な自己紹介をお送りいたします。Figma tokenの構成やチーム体制について、まずは30分ほどお話しさせてください。</p>
+    <a href="#" class="btn btn-primary">Kairosに相談・応募する</a>
+    <div class="meta">
+      <span>月160H ／ フルリモート（緊急時出社対応可）</span>
+      <span>関東圏在住</span>
+      <span>想定契約金額 65万円〜</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  KAIROS ― Web制作・システム開発チーム ／ Proposal for Hakobune, 2024
+</footer>
+
+</body>
+</html>
